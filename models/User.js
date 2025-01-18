@@ -5,17 +5,11 @@ const UserSchema = new mongoose.Schema({
     username: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     passwordHash: { type: String, required: true },
-    orders: [{
-        orderId: String,
-        status: String,
-        totalPrice: Number,
-        products: [{
-            productId: String,
-            quantity: Number
-        }],
-        paymentMethod: String,
-        date: Date
-    }]
+    phoneNumber: { type: String },
+    address: { type: String },
+    verificationCode: { type: String },
+    isVerified: { type: Boolean, default: false },
+    createdAt: { type: Date, default: Date.now },
 });
 
 UserSchema.methods.isValidPassword = async function (password) {
