@@ -11,34 +11,31 @@ app.use(express.json());
 
 // MongoDB connection
 mongoose
-  .connect(
-    "mongodb://127.0.0.1:27017/SWP",
-    {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    }
-  )
+  .connect("mongodb://127.0.0.1:27017/SWP_restaurant", {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.log("Error connecting to MongoDB", err));
 
-  // Xóa tài khoản chưa xác thực
+// Xóa tài khoản chưa xác thực
 const deleteUnverifiedAccounts = async () => {
   const expirationTime = 10 * 60 * 1000;
   const thresholdDate = new Date(Date.now() - expirationTime);
-  
+
   console.log(`Đang xóa tài khoản chưa xác thực trước: ${thresholdDate}`);
-  
-  const result = await User.deleteMany({ 
-    isVerified: false, 
-    createdAt: { $lt: thresholdDate } 
+
+  const result = await User.deleteMany({
+    isVerified: false,
+    createdAt: { $lt: thresholdDate },
   });
-  
+
   console.log(`Số tài khoản đã xóa: ${result.deletedCount}`);
 };
 
 setInterval(() => {
   deleteUnverifiedAccounts();
-},10 * 60 * 1000);
+}, 10 * 60 * 1000);
 
 // Routes
 app.get("/", (req, res) => res.send("Backend is running"));

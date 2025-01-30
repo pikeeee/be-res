@@ -47,16 +47,22 @@ exports.signup = async (req, res) => {
     !normalizedEmail ||
     typeof normalizedEmail !== "string" ||
     !isValidEmail(normalizedEmail) ||
-    !isValidEmailName(normalizedEmail) ||  // Kiểm tra tên người dùng trong email
+    !isValidEmailName(normalizedEmail) || // Kiểm tra tên người dùng trong email
     !normalizedEmail.endsWith("@gmail.com")
   ) {
-    return res.status(400).json({ message: "Email name must be at least 6 characters long and cannot contain special characters" });
+    return res
+      .status(400)
+      .json({
+        message:
+          "Email name must be at least 6 characters long and cannot contain special characters",
+      });
   }
 
   // Kiểm tra mật khẩu
   if (!password || typeof password !== "string" || !isValidPassword(password)) {
     return res.status(400).json({
-      message: "Password must be at least 6 characters long and cannot contain special characters",
+      message:
+        "Password must be at least 6 characters long and cannot contain special characters",
     });
   }
 
@@ -94,7 +100,12 @@ exports.signup = async (req, res) => {
     });
 
     await newUser.save();
-    res.status(201).json({ message: "User created successfully. Please check your email for the verification code." });
+    res
+      .status(201)
+      .json({
+        message:
+          "User created successfully. Please check your email for the verification code.",
+      });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -124,10 +135,9 @@ exports.verifyCode = async (req, res) => {
     res.status(200).json({ message: "Email verified successfully" });
 
     // Gọi hàm xóa tài khoản chưa xác thực nhưng không await, đảm bảo lỗi không ảnh hưởng
-    deleteUnverifiedAccounts().catch(error => {
+    deleteUnverifiedAccounts().catch((error) => {
       console.error("Error deleting unverified accounts:", error);
     });
-
   } catch (error) {
     // Đảm bảo rằng bất kỳ lỗi nào đều sẽ chỉ gửi phản hồi một lần
     if (!res.headersSent) {
@@ -251,8 +261,17 @@ exports.resetPassword = async (req, res) => {
   const normalizedEmail = email.toLowerCase();
 
   // Kiểm tra tính hợp lệ của mật khẩu mới
-  if (!newPassword || typeof newPassword !== "string" || !isValidPassword(newPassword)) {
-    return res.status(400).json({ message: "Password must be at least 6 characters long and cannot contain special characters" });
+  if (
+    !newPassword ||
+    typeof newPassword !== "string" ||
+    !isValidPassword(newPassword)
+  ) {
+    return res
+      .status(400)
+      .json({
+        message:
+          "Password must be at least 6 characters long and cannot contain special characters",
+      });
   }
 
   try {
@@ -260,7 +279,9 @@ exports.resetPassword = async (req, res) => {
 
     // Kiểm tra nếu người dùng không tồn tại hoặc mã xác thực chưa bị xóa
     if (!user || user.verificationCode !== null) {
-      return res.status(400).json({ message: "User not found or verification incomplete" });
+      return res
+        .status(400)
+        .json({ message: "User not found or verification incomplete" });
     }
 
     // Đặt lại mật khẩu
