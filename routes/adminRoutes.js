@@ -1,14 +1,21 @@
 //routes/adminRoutes.js
 const express = require("express");
-const { registerAdmin, loginAdmin, isAdmin } = require("../controllers/AdminController");
+const { registerAdmin,getAllAdmins, loginAdmin, getAdmins, updateAdmin, deleteAdmin, isAdmin } = require("../controllers/AdminController");
 
 const router = express.Router();
 
 router.post("/register", registerAdmin);
+
 router.post("/login", loginAdmin);
-router.get("/dashboard", isAdmin, (req, res) => {
-  res.json({ message: "Welcome to admin dashboard" });
-});
+
+router.get('/admins', getAllAdmins);
+
+router.get("/", isAdmin, getAdmins);
+
+router.put("/:id", isAdmin, updateAdmin);
+
+router.delete("/:id", isAdmin, deleteAdmin);
 
 module.exports = router;
+
 
