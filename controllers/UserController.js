@@ -50,12 +50,10 @@ exports.signup = async (req, res) => {
     !isValidEmailName(normalizedEmail) || // Kiểm tra tên người dùng trong email
     !normalizedEmail.endsWith("@gmail.com")
   ) {
-    return res
-      .status(400)
-      .json({
-        message:
-          "Email name must be at least 6 characters long and cannot contain special characters",
-      });
+    return res.status(400).json({
+      message:
+        "Email name must be at least 6 characters long and cannot contain special characters",
+    });
   }
 
   // Kiểm tra mật khẩu
@@ -100,12 +98,10 @@ exports.signup = async (req, res) => {
     });
 
     await newUser.save();
-    res
-      .status(201)
-      .json({
-        message:
-          "User created successfully. Please check your email for the verification code.",
-      });
+    res.status(201).json({
+      message:
+        "User created successfully. Please check your email for the verification code.",
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -266,12 +262,10 @@ exports.resetPassword = async (req, res) => {
     typeof newPassword !== "string" ||
     !isValidPassword(newPassword)
   ) {
-    return res
-      .status(400)
-      .json({
-        message:
-          "Password must be at least 6 characters long and cannot contain special characters",
-      });
+    return res.status(400).json({
+      message:
+        "Password must be at least 6 characters long and cannot contain special characters",
+    });
   }
 
   try {
