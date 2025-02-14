@@ -6,6 +6,8 @@ const User = require("./models/User");
 
 const app = express();
 const server = http.createServer(app);
+require('dotenv').config();
+console.log("JWT_SECRET:", process.env.JWT_SECRET);
 
 app.use(cors());
 app.use(express.json());
