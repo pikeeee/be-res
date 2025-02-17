@@ -12,14 +12,9 @@ app.use(express.json());
 
 // MongoDB connection
 mongoose
-  .connect("mongodb://127.0.0.1:27017/SWP_restaurant", {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => {
-    console.log("MongoDB connected");
-  })
-  .catch((err) => console.log("Error connecting to MongoDB", err));
+  .connect("mongodb://127.0.0.1:27017/SWP_restaurant")
+  .then(() => console.log("MongoDB connected"))
+  .catch((err) => console.log("Error connecting to MongoDB:", err));
 
 // Xóa tài khoản chưa xác thực sau 10 phút
 const deleteUnverifiedAccounts = async () => {
@@ -49,12 +44,14 @@ app.get("/", (req, res) => res.send("Backend is running"));
 // Import routes
 const userRoutes = require("./routes/userRoutes");
 const adminRoutes = require("./routes/adminRoutes");
+const productRoutes = require("./routes/productRoutes");
 
 // Use routes
 app.use("/users", userRoutes);
 app.use("/admin", adminRoutes);
+app.use("/products", productRoutes);
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
