@@ -3,6 +3,8 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { sendVerificationCode } = require("../services/EmailService");
 
+require('dotenv').config();
+
 const isValidEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
@@ -146,13 +148,11 @@ exports.verifyCode = async (req, res) => {
 
 //edit pass
 exports.editPassword = async (req, res) => {
-  const { password, newPassword } = req.body; // Lấy mật khẩu từ request body
-  const token = req.headers.authorization?.split(" ")[1]; // Lấy token từ header Authorization
+  const { password, newPassword } = req.body;
+  const token = req.headers.authorization?.split(" ")[1];
 
   if (!token) {
-    return res
-      .status(401)
-      .json({ message: "Token is required for authentication" });
+    return res.status(401).json({ message: "Token is required for authentication" });
   }
 
   if (!password || typeof password !== "string") {
@@ -160,32 +160,24 @@ exports.editPassword = async (req, res) => {
   }
 
   if (!newPassword || typeof newPassword !== "string") {
-    return res
-      .status(400)
-      .json({ message: "New password is empty or invalid" });
+    return res.status(400).json({ message: "New password is empty or invalid" });
   }
 
   try {
     // Giải mã token để lấy userId từ JWT
-    const decoded = jwt.verify(token, "your_jwt_secret");
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Tìm người dùng trong cơ sở dữ liệu
     const user = await User.findById(decoded.userId);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-
-    // So sánh mật khẩu hiện tại với mật khẩu đã mã hóa
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
     if (!isPasswordValid) {
       return res.status(400).json({ message: "Incorrect current password" });
     }
-
-    // Mã hóa mật khẩu mới
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-    // Cập nhật mật khẩu mới
     user.passwordHash = hashedPassword;
     await user.save();
 
@@ -222,7 +214,7 @@ exports.login = async (req, res) => {
     if (!isMatch)
       return res.status(400).json({ message: "Invalid credentials" });
 
-    const token = jwt.sign({ userId: user._id }, "your_jwt_secret");
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
     res.status(200).json({ token, userId: user._id });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -298,7 +290,7 @@ exports.getProfile = async (req, res) => {
 
   const token = authHeader.split(" ")[1];
   try {
-    const decoded = jwt.verify(token, "your_jwt_secret");
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(decoded.userId);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -323,7 +315,7 @@ exports.editProfile = async (req, res) => {
 
   const token = authHeader.split(" ")[1];
   try {
-    const decoded = jwt.verify(token, "your_jwt_secret");
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const userId = decoded.userId;
     const { username, phoneNumber, address } = req.body;
 
