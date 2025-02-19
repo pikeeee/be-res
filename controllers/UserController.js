@@ -3,7 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { sendVerificationCode } = require("../services/EmailService");
 
-require('dotenv').config();
+require("dotenv").config();
 
 const isValidEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -152,7 +152,9 @@ exports.editPassword = async (req, res) => {
   const token = req.headers.authorization?.split(" ")[1];
 
   if (!token) {
-    return res.status(401).json({ message: "Token is required for authentication" });
+    return res
+      .status(401)
+      .json({ message: "Token is required for authentication" });
   }
 
   if (!password || typeof password !== "string") {
@@ -160,7 +162,9 @@ exports.editPassword = async (req, res) => {
   }
 
   if (!newPassword || typeof newPassword !== "string") {
-    return res.status(400).json({ message: "New password is empty or invalid" });
+    return res
+      .status(400)
+      .json({ message: "New password is empty or invalid" });
   }
 
   try {
@@ -187,6 +191,7 @@ exports.editPassword = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
+
 // User Login
 exports.login = async (req, res) => {
   const { email, password } = req.body;
@@ -214,13 +219,22 @@ exports.login = async (req, res) => {
     if (!isMatch)
       return res.status(400).json({ message: "Invalid credentials" });
 
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
-    res.status(200).json({ token, userId: user._id });
+    const token = jwt.sign(
+      { userId: user._id, role: user.role }, // Sử dụng role từ cơ sở dữ liệu
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    // Trả về phản hồi đúng định dạng
+    res.status(200).json({
+      token,
+      userId: user._id,
+      role: user.role, // Trả về role từ cơ sở dữ liệu
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
-
 // Gửi mã xác thực khi quên mật khẩu
 exports.sendForgotPasswordCode = async (req, res) => {
   const { email } = req.body;

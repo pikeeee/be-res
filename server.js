@@ -6,7 +6,7 @@ const User = require("./models/User");
 
 const app = express();
 const server = http.createServer(app);
-require('dotenv').config();
+require("dotenv").config();
 console.log("JWT_SECRET:", process.env.JWT_SECRET);
 
 app.use(cors());
@@ -53,7 +53,7 @@ app.use("/users", userRoutes);
 app.use("/admin", adminRoutes);
 app.use("/products", productRoutes);
 
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
