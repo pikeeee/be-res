@@ -1,21 +1,21 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const userController = require('../controllers/UserController');
+const userController = require("../controllers/UserController");
 
 // Signup Route
-router.post('/signup', userController.signup);
+router.post("/signup", userController.signup);
 
 // Login Route
-router.post('/login', userController.login);
+router.post("/login", userController.login);
 
 // Get User Profile Route
-router.get('/profile', userController.getProfile);
+router.get("/profile", userController.getProfile);
 
 // Logout Route
-router.post('/logout', userController.logout);
+router.post("/logout", userController.logout);
 
 // Edit User Profile Route
-router.put('/profile', userController.editProfile);
+router.put("/profile", userController.editProfile);
 
 //Edit PassWord
 router.put("/editPass", userController.editPassword);
