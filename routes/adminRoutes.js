@@ -23,5 +23,5 @@ router.put("/:id", isAdmin, updateAdmin);
 
 router.delete("/:id", isAdmin, deleteAdmin);
 
-router.get("/users", isAdmin, getAllUsers);
+router.get("/user", isAdmin, getAllUsers);
 module.exports = router;

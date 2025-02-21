@@ -15,6 +15,9 @@ exports.registerAdmin = async (req, res) => {
   if (existingAdmin) {
     return res.status(400).json({ message: "Admin already exists" });
   }
+  if (!email.endsWith("@admin.com")) {
+    return res.status(400).json({ message: "Email must end with @admin.com" });
+  }
   const hashedPassword = await bcrypt.hash(password, 10);
   const admin = new Admin({
     username,
