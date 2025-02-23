@@ -5,7 +5,7 @@ const TableSchema = new mongoose.Schema({
   numberOfPeople: { type: Number, required: true },
   dateTime: { type: Date, required: true },
   note: { type: String },
-  email: { type: String, required: true, unique: true },
+  email: { type: String, unique: true, sparse: true }, // email là trường tuỳ chọn
 });
 
 module.exports = mongoose.model("Table", TableSchema);
