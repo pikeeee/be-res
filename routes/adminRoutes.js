@@ -13,6 +13,9 @@ const {
   getTables,
   updateTable,
   deleteTable,
+  deleteUser,
+  getAdminProfile,
+  changeAdminPassword, // Make sure it's imported here
 } = require("../controllers/AdminController");
 
 const router = express.Router();
@@ -23,9 +26,15 @@ router.post("/login", loginAdmin);
 router.get("/", isAdmin, getAdmins);
 router.get("/users", isAdmin, getAllUsers);
 router.get("/all", isAdmin, getAllAdminsAndUsers);
-router.put("/:id", isAdmin, updateAdmin);
-router.delete("/:id", isAdmin, deleteAdmin);
 router.put("/updateRole/:id", isAdmin, upgradeUserToAdmin);
+router.delete("/users/:id", isAdmin, deleteUser);
+router.delete("/:id", isAdmin, deleteAdmin);
+
+// Route lấy và cập nhật thông tin admin
+router.get("/profile", isAdmin, getAdminProfile); // Lấy thông tin admin theo ID
+router.put("/profile/:id", isAdmin, updateAdmin);
+// Route: Thay đổi mật khẩu admin
+router.put("/editPass", isAdmin, changeAdminPassword);
 
 // Route cho Table
 router.post("/tables", isAdmin, addTable);

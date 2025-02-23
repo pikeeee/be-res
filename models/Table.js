@@ -1,11 +1,15 @@
 const mongoose = require("mongoose");
-const TableSchema = new mongoose.Schema({
-  name: { type: String, required: true }, // tên khách hàng
-  phoneNumber: { type: String },
-  numberOfPeople: { type: Number, required: true },
-  dateTime: { type: Date, required: true },
-  note: { type: String },
-  email: { type: String, unique: true, sparse: true }, // email là trường tuỳ chọn
-});
 
-module.exports = mongoose.model("Table", TableSchema);
+const tableSchema = new mongoose.Schema(
+  {
+    customerName: { type: String },
+    tableNumber: { type: Number, required: true, unique: true },
+    phoneNumber: { type: String },
+    numberOfPeople: { type: Number, default: 0 },
+    dateTime: { type: Date, default: Date.now },
+    note: { type: String, default: "" },
+  },
+  { timestamps: true }
+);
+
+module.exports = mongoose.model("Table", tableSchema);
