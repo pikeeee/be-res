@@ -363,3 +363,27 @@ exports.editProfile = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+exports.uploadAvatar = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+
+    const avatarUrl = `/uploads/${req.file.filename}`; // Đường dẫn lưu trữ ảnh
+
+    // Cập nhật avatar cho người dùng
+    const user = await User.findById(req.user._id); // Lấy user từ token
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    user.avatar = avatarUrl; // Lưu đường dẫn ảnh vào cơ sở dữ liệu
+    await user.save();
+
+    res.json({ avatarUrl }); // Trả về URL ảnh đã upload
+  } catch (error) {
+    console.error("Error uploading avatar:", error);
+    res.status(500).json({ error: "Error uploading avatar" });
+  }
+};

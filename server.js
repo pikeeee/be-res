@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const http = require("http");
 const User = require("./models/User");
+const path = require("path");
 
 const app = express();
 const server = http.createServer(app);
@@ -42,6 +43,9 @@ setInterval(deleteUnverifiedAccounts, 10 * 60 * 1000);
 
 // Routes
 app.get("/", (req, res) => res.send("Backend is running"));
+
+// Cấu hình để Express phục vụ các file tĩnh (tệp ảnh, tệp khác) từ thư mục uploads
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Import routes
 const userRoutes = require("./routes/userRoutes");
