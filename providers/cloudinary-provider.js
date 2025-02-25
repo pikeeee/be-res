@@ -12,27 +12,6 @@ class CloudinaryProvider extends BaseProvider {
     })
     this.cloudinary = cloudinary
   }
-
-  // Upload file và trả về secure_url (đã chứa version)
-  // async upload(file, key) {
-  //   // Upload file lên Cloudinary
-  //   const response = await this.cloudinary.uploader.upload(file.path, {
-  //     public_id: key,
-  //     folder: this.bucket,
-  //     overwrite: true,
-  //   });
-  
-  //   fs.unlinkSync(file.path);
-  
-  //   console.log("✅ Cloudinary trả về:", response.secure_url);
-  //   console.log("🔍 Version của file:", response.version);
-  
-  //   // Ghi đè key để lưu vào database
-  //   return {
-  //     key: response.secure_url, // Lưu full URL vào DB
-  //     version: response.version // Lưu version riêng (nếu bạn muốn)
-  //   };
-  // }
   async upload(file, key) {
     const response = await this.cloudinary.uploader.upload(file.path, {
       public_id: key,
@@ -47,9 +26,9 @@ class CloudinaryProvider extends BaseProvider {
     console.log("🔍 Version:", response.version);
   
     const uploadData = {
-      key: response.secure_url, // Lưu URL đầy đủ vào `imageUrl`
-      path: response.public_id, // Lưu `publicId`
-      version: response.version // Lưu `version`
+      key: response.secure_url, 
+      path: response.public_id,
+      version: response.version 
     };
   
     console.log("📌 Trả về từ `upload()`:", uploadData);
@@ -58,7 +37,6 @@ class CloudinaryProvider extends BaseProvider {
   
   
 
-  // Xoá file: sử dụng regex đơn giản để tách public_id từ secure_url
   async delete(key) {
     // const regex = /\/v\d+\/(.+)\.[a-zA-Z]+$/;
     // const match = key.match(regex);
@@ -69,7 +47,6 @@ class CloudinaryProvider extends BaseProvider {
     // await this.cloudinary.uploader.destroy(publicId);
   }
 
-  // Trả về URL hiển thị: nếu key đã là URL thì trả về luôn key
   path(key) {
     if (key.startsWith('http://') || key.startsWith('https://')) {
       return key;

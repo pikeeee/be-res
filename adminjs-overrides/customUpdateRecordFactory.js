@@ -1,8 +1,5 @@
 import { flat } from 'adminjs';
-// Định nghĩa DB_PROPERTIES thay vì import từ constants (vì module đó không được export)
 const DB_PROPERTIES = ['key', 'bucket', 'size', 'mimeType', 'filename'];
-
-// Import module từ node_modules tương tự như cách bạn làm với UploadListComponent
 import { buildRemotePath } from '../node_modules/@adminjs/upload/build/features/upload-file/utils/build-remote-path.js';
 import { getNamespaceFromContext } from '../node_modules/@adminjs/upload/build/features/upload-file/factories/strip-payload-factory.js';
 
@@ -17,7 +14,6 @@ export const customUpdateRecordFactory = (uploadOptionsWithDefault, provider) =>
       return response;
     }
     if (record && record.isValid()) {
-      // Xử lý xóa nhiều file
       if (multiple && filesToDelete && filesToDelete.length) {
         const filesData = filesToDelete.map((index) => ({
           key: record.get(properties.key)[index],
@@ -39,7 +35,6 @@ export const customUpdateRecordFactory = (uploadOptionsWithDefault, provider) =>
         }, {});
         await record.update(newParams);
       }
-      // Xử lý upload nhiều file
       if (multiple && files && files.length) {
         const uploadedFiles = files;
         const keys = await Promise.all(
@@ -83,7 +78,6 @@ export const customUpdateRecordFactory = (uploadOptionsWithDefault, provider) =>
           record: record.toJSON(context.currentAdmin),
         };
       }
-      // Xử lý upload 1 file (không multiple)
       if (!multiple && files && files.length) {
         console.log(">>> Single file upload branch");
         const uploadedFile = files[0];
@@ -97,13 +91,13 @@ export const customUpdateRecordFactory = (uploadOptionsWithDefault, provider) =>
         console.log("✅ Kết quả từ provider.upload:", uploadResult);
       
         const params = {
-          [properties.key]: uploadResult.key, // Lưu URL đầy đủ (secure_url)
+          [properties.key]: uploadResult.key, 
           ...properties.bucket && { [properties.bucket]: provider.bucket },
           ...properties.size && { [properties.size]: uploadedFile.size?.toString() },
           ...properties.mimeType && { [properties.mimeType]: uploadedFile.type },
           ...properties.filename && { [properties.filename]: uploadedFile.name },
-          ...properties.extra?.path && { [properties.extra.path]: uploadResult.path }, // Lưu publicId
-          ...properties.extra?.version && { [properties.extra.version]: uploadResult.version }, // Lưu version
+          ...properties.extra?.path && { [properties.extra.path]: uploadResult.path }, 
+          ...properties.extra?.version && { [properties.extra.version]: uploadResult.version },
         };
       
         console.log("🔍 Thông tin sắp lưu vào database:", params);
@@ -121,7 +115,6 @@ export const customUpdateRecordFactory = (uploadOptionsWithDefault, provider) =>
           record: record.toJSON(context.currentAdmin),
         };
       }
-      // Xử lý khi file bị xóa (trường hợp không multiple)
       if (!multiple && files === null) {
         const bucket = (properties.bucket && record.get(properties.bucket)) || provider.bucket;
         const key = record.get(properties.key);

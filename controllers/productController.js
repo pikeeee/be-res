@@ -2,7 +2,6 @@ import Product from "../models/Product.js";
 import cloudinary from "../config/cloudinary.js";
 import multer from "multer";
 
-// Cấu hình multer (lưu file tạm trước khi upload lên Cloudinary)
 const upload = multer({ dest: "uploads/" });
 
 // Get all products
@@ -29,12 +28,10 @@ export const getProductById = async (req, res) => {
 };
 
 export const addProduct = async (req, res) => {
-  console.log(999988889998889999);
   try {
-    let imageUrl = req.body.imageUrl; // Nếu đã có URL sẵn thì dùng
+    let imageUrl = req.body.imageUrl; 
     let cloudinaryId = null;
 
-    // Nếu có file ảnh thì upload lên Cloudinary
     if (req.file) {
       const result = await cloudinary.uploader.upload(req.file.path);
       imageUrl = result.secure_url;
@@ -61,16 +58,14 @@ export const addProduct = async (req, res) => {
 };
 
 export const updateProduct = async (req, res) => {
-  console.log(999988889998889999);
   try {
     const product = await Product.findById(req.params.id);
     if (!product) return res.status(404).json({ error: "Product not found" });
 
-    let imageUrl = product.imageUrl; // Giữ ảnh cũ nếu không có ảnh mới
+    let imageUrl = product.imageUrl; 
     let cloudinaryId = product.cloudinaryId;
 
     if (req.file) {
-      // Xóa ảnh cũ trên Cloudinary trước khi upload ảnh mới
       if (cloudinaryId) {
         await cloudinary.uploader.destroy(cloudinaryId);
       }
@@ -100,7 +95,6 @@ export const deleteProduct = async (req, res) => {
     const product = await Product.findByIdAndDelete(req.params.id);
     if (!product) return res.status(404).json({ error: "Product not found" });
 
-    // Xóa ảnh trên Cloudinary
     if (product.cloudinaryId) {
       await cloudinary.uploader.destroy(product.cloudinaryId);
     }

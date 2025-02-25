@@ -3,23 +3,21 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2022-11-15", // chọn version phù hợp
+  apiVersion: "2022-11-15", 
 });
 
 const createCheckoutSession = async (req, res) => {
   try {
-    // Nhận dữ liệu từ frontend
     const {
-      amount,        // Số tiền cần thanh toán (đơn vị cent)
-      currency,      // Đơn vị tiền tệ (mặc định usd)
-      orderId,       // ID đơn hàng (tạo từ frontend)
-      userId,        // ID người dùng
-      products,      // Danh sách sản phẩm được chọn, dạng chuỗi JSON
-      totalPrice,    // Tổng số tiền (đã chuyển thành chuỗi)
-      paymentMethod, // Phương thức thanh toán (ví dụ: "Stripe")
+      amount,        
+      currency,      
+      orderId,       
+      userId,        
+      products,      
+      totalPrice,    
+      paymentMethod, 
     } = req.body;
 
-    // Kiểm tra bắt buộc các trường cần thiết (bạn có thể bổ sung kiểm tra bổ sung nếu cần)
     if (!userId || !products || !totalPrice) {
       return res.status(400).json({ error: "Missing required order metadata" });
     }
@@ -33,7 +31,7 @@ const createCheckoutSession = async (req, res) => {
             product_data: {
               name: "Order #" + orderId,
             },
-            unit_amount: amount, // đơn vị là cent
+            unit_amount: amount, 
           },
           quantity: 1,
         },
@@ -44,9 +42,9 @@ const createCheckoutSession = async (req, res) => {
       metadata: {
         orderId,
         userId,
-        products,      // Dạng chuỗi JSON
-        totalPrice,    // Dạng chuỗi, sẽ được ép về Number trong webhook
-        paymentMethod, // Ví dụ: "Stripe"
+        products,      
+        totalPrice,    
+        paymentMethod, 
       },
     });
 

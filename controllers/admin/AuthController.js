@@ -3,9 +3,8 @@ import jwt from "jsonwebtoken";
 import Admin from "../../models/Admin.js";
 
 export const registerAdmin = async (req, res) => {
-  console.log("Register API Called");  // ✅ Debug xem API có được gọi không
-  console.log("Request Body:", req.body);  // ✅ Xem dữ liệu có đúng không
-  console.log(123123111111);
+  console.log("Register API Called");
+  console.log("Request Body:", req.body);  
   
   const { username, email, password } = req.body;
   if (!username || !email || !password) {

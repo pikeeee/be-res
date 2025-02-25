@@ -58,7 +58,6 @@ export const updateCartItem = async (req, res) => {
     console.log(11122233666, cart.products);
     console.log(99111, req.params)
     const itemId_await = req.params.productId
-    // So sánh với _id của phần tử giỏ hàng (thay vì productId)
     const productIndex = cart.products.findIndex(
       (item) => item.productId.toString() === itemId_await
     );
@@ -68,10 +67,8 @@ export const updateCartItem = async (req, res) => {
     }
 
     if (quantity <= 0) {
-      // Nếu quantity về 0 hoặc âm, xoá mục khỏi giỏ hàng
       cart.products.splice(productIndex, 1);
     } else {
-      // Cập nhật số lượng
       cart.products[productIndex].quantity = quantity;
     }
 
@@ -81,6 +78,5 @@ export const updateCartItem = async (req, res) => {
     res.status(500).json({ message: "Server error", error: err });
   }
 };
-
 
 export default { getCart, addToCart, updateCartItem };

@@ -6,14 +6,12 @@ import { AdminJS, ComponentLoader } from "adminjs";
 import AdminJSExpress from "@adminjs/express";
 import * as AdminJSMongoose from "@adminjs/mongoose";
 import bcrypt from "bcryptjs";
-import multer from "multer";
 import adminRoutes from "./routes/adminRoutes.js";
 import productRoutes from './routes/productRoutes.js';
 import userRoutes from "./routes/userRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js"
-
 import checkoutController from "./controllers/checkoutController.js";
 import stripeWebhook from "./controllers/stripeWebhook.js";
 import Admin from "./models/Admin.js";
@@ -27,25 +25,21 @@ import Menu from "./models/Menu.js";
 import uploadFeature from "@adminjs/upload";
 import { fileURLToPath } from "url";
 import path from "path";
-import CloudinaryProvider from "./providers/cloudinary-provider.js"; // Import custom provider
+import CloudinaryProvider from "./providers/cloudinary-provider.js";
 
 dotenv.config();
 
 const app = express();
 
-// 1) Kết nối MongoDB
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connected"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
-// 2) Đăng ký adapter cho AdminJS (Mongoose)
 AdminJS.registerAdapter(AdminJSMongoose);
 
-// 3) Khởi tạo ComponentLoader và đăng ký các components cần thiết
 const componentLoader = new ComponentLoader();
 
-// Đường dẫn đến các components của @adminjs/upload
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
@@ -85,13 +79,12 @@ const uploadShowPath = path.join(
   "UploadShowComponent.js"
 );
 
-// Normalize paths for Windows
 const normalizePath = (filePath) => {
   return process.platform === "win32" ? filePath.replace(/^\/+/, "") : filePath;
 };
 
 const imageListComponent = componentLoader.add(
-  "ImageList", // Tên alias tuỳ ý
+  "ImageList", 
   path.join(__dirname, "adminjs-components", "ImageList.jsx")
 );
 
@@ -110,7 +103,6 @@ const Components = {
   ),
 };
 
-// 4) Khởi tạo AdminJS với cấu hình custom component cho trường imageUrl của Product
 const adminJsInstance = new AdminJS({
   componentLoader,
   rootPath: "/admin",
@@ -132,18 +124,17 @@ const adminJsInstance = new AdminJS({
             apiSecret: process.env.CLOUD_API_SECRET,
           }),
           properties: {
-            file: "uploadImage",   // Field nhận file từ form
-            key: "imageUrl",       // Lưu URL đầy đủ vào `imageUrl`
+            file: "uploadImage",   
+            key: "imageUrl",      
             imageUrl: {
-              // Ẩn input form (nếu muốn), chỉ hiển thị ở list, show
               isVisible: {
-                list: false,  // hiển thị ở danh sách
-                show: false,  // hiển thị ở trang show
-                edit: false, // ẩn trong form edit
+                list: false, 
+                show: false,
+                edit: false,
                 filter: false,
               },
               components: {
-                list: imageListComponent, // Sử dụng component custom ở list
+                list: imageListComponent,
               },
             },
           },
@@ -162,12 +153,10 @@ const adminJsInstance = new AdminJS({
   },
 });
 
-// 5) Enable AdminJS watch mode for hot reloading (development only)
 if (process.env.NODE_ENV === "development") {
   adminJsInstance.watch();
 }
 
-// 6) Xây dựng router AdminJS với xác thực
 const adminRouter = AdminJSExpress.buildAuthenticatedRouter(
   adminJsInstance,
   {
@@ -187,7 +176,6 @@ const adminRouter = AdminJSExpress.buildAuthenticatedRouter(
   }
 );
 
-// 7) Đặt middleware: AdminJS router, sau đó là static files, cors, json,...
 app.use("/webhook/stripe", express.raw({ type: "application/json" }), stripeWebhook);
 app.use(adminJsInstance.options.rootPath, adminRouter);
 
@@ -195,13 +183,10 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.get("/admin/display-image", async (req, res) => {
-  // Ví dụ: lấy URL ảnh từ database hoặc dùng giá trị mẫu.
-  // Trong trường hợp demo, chúng ta dùng URL mẫu:
   const imageUrl = "https://res.cloudinary.com/dmaqmt8mw/image/upload/v1740428027/products/67bcd2f92c1ea73073a256f6/hinh-anime-2.jpg.jpg";
   res.render("display-image", { imageUrl });
 });
 
-// 9) Đặt các route API khác (nếu có)
 app.use("/api/admin", adminRoutes);
 app.use('/api/products', productRoutes);  
 app.use('/api/product', productRoutes);  
@@ -215,7 +200,6 @@ app.use('/api/order', orderRoutes);
 app.post("/api/checkout", checkoutController.createCheckoutSession);
 
 
-// 10) Khởi động server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
