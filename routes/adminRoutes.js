@@ -1,39 +1,28 @@
-const express = require("express");
-const {
-  registerAdmin,
-  loginAdmin,
-  getAdmins,
-  updateAdmin,
-  deleteAdmin,
-  isAdmin,
-  getAllUsers,
-  getAllAdminsAndUsers,
-  upgradeUserToAdmin,
-  addTable,
-  getTables,
-  updateTable,
-  deleteTable,
-  deleteUser,
-  getAdminProfile,
-  changeAdminPassword, // Make sure it's imported here
-} = require("../controllers/AdminController");
+import express from "express";
+import { registerAdmin, loginAdmin } from "../controllers/admin/AuthController.js";
+import { getAdmins, updateAdmin, deleteAdmin, getAdminProfile, changeAdminPassword } from "../controllers/admin/AdminController.js";
+// import { getAllUsers, getAllAdminsAndUsers, deleteUser, upgradeUserToAdmin } from "../controllers/admin/UserController.js";
+import { getAllUsers, deleteUser } from "../controllers/admin/UserController.js";
+import { addTable, getTables, updateTable, deleteTable } from "../controllers/admin/TableController.js";
+import { isAdmin } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
+
+console.log(123123132);
+
 
 // Route cho Admin
 router.post("/register", registerAdmin);
 router.post("/login", loginAdmin);
-router.get("/", isAdmin, getAdmins);
+router.get("/admins", isAdmin, getAdmins);
 router.get("/users", isAdmin, getAllUsers);
-router.get("/all", isAdmin, getAllAdminsAndUsers);
-router.put("/updateRole/:id", isAdmin, upgradeUserToAdmin);
+// router.get("/all", isAdmin, getAllAdminsAndUsers);
 router.delete("/users/:id", isAdmin, deleteUser);
-router.delete("/:id", isAdmin, deleteAdmin);
+router.delete("/admins/:id", isAdmin, deleteAdmin);
 
 // Route lấy và cập nhật thông tin admin
-router.get("/profile", isAdmin, getAdminProfile); // Lấy thông tin admin theo ID
+router.get("/profile", isAdmin, getAdminProfile);
 router.put("/profile/:id", isAdmin, updateAdmin);
-// Route: Thay đổi mật khẩu admin
 router.put("/editPass", isAdmin, changeAdminPassword);
 
 // Route cho Table
@@ -42,4 +31,4 @@ router.get("/tables", isAdmin, getTables);
 router.put("/tables/:id", isAdmin, updateTable);
 router.delete("/tables/:id", isAdmin, deleteTable);
 
-module.exports = router;
+export default router;

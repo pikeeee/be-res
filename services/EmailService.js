@@ -1,30 +1,31 @@
-// services/emailService.js
-const nodemailer = require('nodemailer');
+import nodemailer from 'nodemailer';
 
-// Tạo transporter cho Nodemailer
+// Tạo transporter sử dụng Mailtrap SMTP
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: 'saxuan2003@gmail.com',
-        pass: 'vfyp rdok jsrk vwei'
-    }
+  host: "sandbox.smtp.mailtrap.io",
+  port: 2525,
+  auth: {
+    user: "0e07b88bfc7ce5",
+    pass: "026c20ce6b8137"
+  }
 });
 
-// Hàm gửi mã xác minh
-const sendVerificationCode = async (email, code) => {
-    const mailOptions = {
-        from: 'saxuan2003@gmail.com',
-        to: email,
-        subject: 'Your Verification Code',
-        text: `Your verification code is ${code}. Please use this code to verify your account.`
-    };
+// Hàm gửi mã xác minh sử dụng Mailtrap
+export const sendVerificationCode = async (email, code) => {
+  const mailOptions = {
+    from: '"Your App" <no-reply@yourapp.com>',
+    to: email,
+    subject: 'Your Verification Code',
+    text: `Your verification code is ${code}. Please use this code to verify your account.`
+  };
 
-    try {
-        await transporter.sendMail(mailOptions);
-        console.log('Verification email sent');
-    } catch (error) {
-        console.error('Error sending email', error);
-    }
+  // Log thông tin cho dev (chỉ nên dùng trong môi trường dev)
+  console.log(`[DEV LOG] Sending verification code to ${email}: ${code}`);
+  
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log('Verification email sent');
+  } catch (error) {
+    console.error('Error sending email', error);
+  }
 };
-
-module.exports = { sendVerificationCode };

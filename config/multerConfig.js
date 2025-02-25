@@ -1,6 +1,11 @@
-const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
+import multer from "multer";
+import path from "path";
+import fs from "fs";
+import { fileURLToPath } from "url";
+
+// Xác định __dirname trong ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const uploadDir = path.join(__dirname, "../uploads");
 if (!fs.existsSync(uploadDir)) {
@@ -18,7 +23,6 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage: storage,
-  // Không giới hạn kích thước file, xóa phần limits đi
   fileFilter: (req, file, cb) => {
     const fileTypes = /jpeg|jpg|png|gif/;
     const extname = fileTypes.test(path.extname(file.originalname).toLowerCase());
@@ -32,4 +36,4 @@ const upload = multer({
   },
 });
 
-module.exports = upload;
+export default upload;

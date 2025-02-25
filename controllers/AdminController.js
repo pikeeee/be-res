@@ -8,6 +8,8 @@ const Table = require("../models/Table");
 
 // Đăng ký admin
 exports.registerAdmin = async (req, res) => {
+  console.log(1110101010);
+  
   const { username, email, password } = req.body;
   if (!username || !email || !password) {
     return res.status(400).json({ message: "Missing required fields" });
@@ -63,19 +65,20 @@ exports.loginAdmin = async (req, res) => {
 };
 
 // Lấy danh sách admin
-exports.getAdmins = async (req, res) => {
+export const getAdmins = async (req, res) => {
   try {
     const admins = await Admin.find().select("-passwordHash");
-    if (!admins || admins.length === 0) {
+    if (!admins.length) {
       return res.status(404).json({ message: "No admins found" });
     }
     res.status(200).json({ admins });
   } catch (error) {
-    res.status(500).json({ message: "Error fetching admins", error });
+    console.error(error);
+    res.status(500).json({ message: "Error fetching admins", error: error.message });
   }
 };
 // Lấy thông tin admin
-exports.getAdminProfile = async (req, res) => {
+export const getAdminProfile = async (req, res) => {
   const authHeader = req.headers.authorization;
   if (!authHeader) {
     return res.status(401).json({ message: "Authorization token is missing" });
@@ -84,14 +87,14 @@ exports.getAdminProfile = async (req, res) => {
   const token = authHeader.split(" ")[1];
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const admin = await Admin.findById(decoded.userId).select("-passwordHash"); // Fetch admin by decoded userId
+    const admin = await Admin.findById(decoded.userId).select("-passwordHash"); 
     if (!admin) {
       return res.status(404).json({ message: "Admin not found" });
     }
     res.status(200).json(admin);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Error fetching admin profile", error });
+    res.status(500).json({ message: "Error fetching admin profile", error: error.message });
   }
 };
 
@@ -126,13 +129,18 @@ exports.updateAdmin = async (req, res) => {
 };
 
 // Xóa admin
-exports.deleteAdmin = async (req, res) => {
-  const { id } = req.params;
-  const deletedAdmin = await Admin.findByIdAndDelete(id);
-  if (!deletedAdmin) {
-    return res.status(404).json({ message: "Admin not found" });
+export const deleteAdmin = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deletedAdmin = await Admin.findByIdAndDelete(id);
+    if (!deletedAdmin) {
+      return res.status(404).json({ message: "Admin not found" });
+    }
+    res.status(200).json({ message: "Admin deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error deleting admin", error });
   }
-  res.status(200).json({ message: "Admin deleted successfully" });
 };
 
 // Middleware xác thực admin
@@ -206,9 +214,9 @@ exports.upgradeUserToAdmin = async (req, res) => {
 };
 
 // API: Xóa user
-exports.deleteUser = async (req, res) => {
-  const { id } = req.params;
+export const deleteUser = async (req, res) => {
   try {
+    const { id } = req.params;
     const deletedUser = await User.findByIdAndDelete(id);
     if (!deletedUser) {
       return res.status(404).json({ message: "User not found" });
@@ -216,38 +224,30 @@ exports.deleteUser = async (req, res) => {
     res.status(200).json({ message: "User deleted successfully" });
   } catch (error) {
     console.error(error);
-    res
-      .status(500)
-      .json({ message: "Error deleting user", error: error.message });
+    res.status(500).json({ message: "Error deleting user", error: error.message });
   }
 };
 
 // API: Thay đổi mật khẩu admin
 
-exports.changeAdminPassword = async (req, res) => {
+export const changeAdminPassword = async (req, res) => {
   const { oldPassword, newPassword } = req.body;
 
-  // Check if old password and new password are provided
   if (!oldPassword || !newPassword) {
-    return res
-      .status(400)
-      .json({ message: "Both old and new passwords are required" });
+    return res.status(400).json({ message: "Both old and new passwords are required" });
   }
 
   try {
-    // Find the admin by the ID from the JWT token
     const admin = await Admin.findById(req.admin.userId);
     if (!admin) {
       return res.status(404).json({ message: "Admin not found" });
     }
 
-    // Compare the old password with the stored password hash
     const isMatch = await bcrypt.compare(oldPassword, admin.passwordHash);
     if (!isMatch) {
       return res.status(400).json({ message: "Old password is incorrect" });
     }
 
-    // Hash the new password and update it
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     admin.passwordHash = hashedPassword;
     await admin.save();
@@ -260,7 +260,7 @@ exports.changeAdminPassword = async (req, res) => {
 };
 
 // API: Thêm bàn dựa trên số lượng
-exports.addTable = async (req, res) => {
+export const addTable = async (req, res) => {
   const { quantity } = req.body;
 
   if (!quantity || typeof quantity !== "number" || quantity <= 0) {
@@ -270,14 +270,11 @@ exports.addTable = async (req, res) => {
   }
 
   try {
-    // Lấy tất cả các bàn hiện có, sắp xếp theo thứ tự tăng dần của tableNumber
     const existingTables = await Table.find().sort({ tableNumber: 1 }).exec();
     const existingNumbers = existingTables.map((t) => t.tableNumber);
 
-    // Xác định số lớn nhất hiện có
     const max = existingNumbers.length > 0 ? Math.max(...existingNumbers) : 0;
 
-    // Tìm các số bị thiếu trong chuỗi từ 1 đến max
     const missingNumbers = [];
     for (let i = 1; i <= max; i++) {
       if (!existingNumbers.includes(i)) {
@@ -285,7 +282,6 @@ exports.addTable = async (req, res) => {
       }
     }
 
-    // Xác định các số bàn cho các bàn mới cần tạo
     let newNumbers = [];
     if (missingNumbers.length >= quantity) {
       newNumbers = missingNumbers.slice(0, quantity);
@@ -297,16 +293,13 @@ exports.addTable = async (req, res) => {
       }
     }
 
-    // Tạo mảng các bàn mới với các số tableNumber được xác định
     const newTables = newNumbers.map((num) => ({
       tableNumber: num,
-      numberOfPeople: 0, // Giá trị mặc định
-      dateTime: new Date(), // Giá trị mặc định là thời gian hiện tại
-      // Các trường khác (customerName, phoneNumber, note) có thể cập nhật sau nếu cần
+      numberOfPeople: 0,
+      dateTime: new Date(),
     }));
 
     const insertedTables = await Table.insertMany(newTables);
-    // Sắp xếp lại theo tableNumber tăng dần
     const sortedTables = insertedTables.sort(
       (a, b) => a.tableNumber - b.tableNumber
     );
@@ -323,6 +316,7 @@ exports.addTable = async (req, res) => {
     });
   }
 };
+
 
 // API lấy danh sách bàn – READ
 exports.getTables = async (req, res) => {
@@ -373,9 +367,9 @@ exports.updateTable = async (req, res) => {
 };
 
 // API xóa bàn – DELETE
-exports.deleteTable = async (req, res) => {
-  const { id } = req.params;
+export const deleteTable = async (req, res) => {
   try {
+    const { id } = req.params;
     const deletedTable = await Table.findByIdAndDelete(id);
     if (!deletedTable) {
       return res.status(404).json({ message: "Không tìm thấy bàn" });

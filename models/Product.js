@@ -1,11 +1,30 @@
-const mongoose = require("mongoose");
+import mongoose from 'mongoose';
 
-const ProductSchema = new mongoose.Schema({
+const productSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  description: { type: String },
   price: { type: Number, required: true },
   imageUrl: { type: String },
-  category: { type: String },
+  category: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: "Category" 
+  },
+  publicId: { type: String },
+  version: { type: String },
+}, { timestamps: true });
+
+productSchema.pre('save', function (next) {
+  if (this.imageUrl) {
+    const publicIdMatch = this.imageUrl.match(/upload\/v\d+\/(.+)\.[a-zA-Z]+$/);
+    const versionMatch = this.imageUrl.match(/\/v(\d+)\//);
+
+    if (publicIdMatch) {
+      this.publicId = publicIdMatch[1];
+    }
+    if (versionMatch) {
+      this.version = versionMatch[1];
+    }
+  }
+  next();
 });
 
-module.exports = mongoose.model("Product", ProductSchema);
+export default mongoose.model('Product', productSchema);
