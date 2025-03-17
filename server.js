@@ -103,6 +103,11 @@ const Components = {
   ),
 };
 
+const dashboardComponent = componentLoader.add(
+  "DashboardComponent",
+  path.join(__dirname, "adminjs-components", "DashboardComponent.jsx")
+);
+
 const adminJsInstance = new AdminJS({
   componentLoader,
   rootPath: "/admin",
@@ -149,9 +154,138 @@ const adminJsInstance = new AdminJS({
   ],
   branding: {
     companyName: "Restaurant Manager",
-    logo: "https://your-logo-url.com/logo.png",
+    logo: "https://cdn.xtmobile.vn/vnt_upload/news/03_2024/22/top-bo-phim-hoat-hinh-anime-hay-xtmobile.jpg",
   },
+
+  dashboard: {
+    handler: async (request, response, context) => {
+      const { tab = 'users', range = 'week' } = request.query || {}
+  
+      let startDate = new Date()
+      let groupStage = {}
+  
+      if (range === 'week') {
+        startDate = new Date(Date.now() - 7 * 86400000)
+        if (tab === 'users' || tab === 'products') {
+          groupStage = {
+            _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+            count: { $sum: 1 }
+          }
+        } else { 
+          groupStage = {
+            _id: { $dateToString: { format: "%Y-%m-%d", date: "$date" } },
+            count: { $sum: 1 }
+          }
+        }
+      } else if (range === 'month') {
+        startDate.setMonth(startDate.getMonth() - 1)
+        if (tab === 'users' || tab === 'products') {
+          groupStage = {
+            _id: {
+              year: { $isoWeekYear: "$createdAt" },
+              isoWeek: { $isoWeek: "$createdAt" }
+            },
+            count: { $sum: 1 }
+          }
+        } else {
+          groupStage = {
+            _id: {
+              year: { $isoWeekYear: "$date" },
+              isoWeek: { $isoWeek: "$date" }
+            },
+            count: { $sum: 1 }
+          }
+        }
+      } else if (range === 'year') {
+        startDate.setFullYear(startDate.getFullYear() - 1)
+        if (tab === 'users' || tab === 'products') {
+          groupStage = {
+            _id: { $dateToString: { format: "%Y-%m", date: "$createdAt" } },
+            count: { $sum: 1 }
+          }
+        } else {
+          groupStage = {
+            _id: { $dateToString: { format: "%Y-%m", date: "$date" } },
+            count: { $sum: 1 }
+          }
+        }
+      }
+  
+      let totalCount = 0
+      let chartData = []
+  
+      if (tab === 'users') {
+        totalCount = await User.countDocuments()
+        const pipeline = [
+          { $match: { createdAt: { $gte: startDate } } },
+          { $group: groupStage },
+          { $sort: { "_id": 1 } },
+        ]
+        const agg = await User.aggregate(pipeline)
+        if (range === 'month') {
+          chartData = agg.map((item) => ({
+            date: `Year ${item._id.year}, Week ${item._id.isoWeek}`,
+            count: item.count,
+          }))
+        } else {
+          chartData = agg.map((item) => ({
+            date: item._id,
+            count: item.count,
+          }))
+        }
+      } else if (tab === 'orders') {
+        totalCount = await Order.countDocuments()
+        const pipeline = [
+          { $match: { date: { $gte: startDate } } },
+          { $group: groupStage },
+          { $sort: { "_id": 1 } },
+        ]
+        const agg = await Order.aggregate(pipeline)
+        if (range === 'month') {
+          chartData = agg.map((item) => ({
+            date: `Year ${item._id.year}, Week ${item._id.isoWeek}`,
+            count: item.count,
+          }))
+        } else {
+          chartData = agg.map((item) => ({
+            date: item._id,
+            count: item.count,
+          }))
+        }
+      } else if (tab === 'products') {
+        totalCount = await Product.countDocuments()
+        const pipeline = [
+          { $match: { createdAt: { $gte: startDate } } },
+          { $group: groupStage },
+          { $sort: { "_id": 1 } },
+        ]
+        const agg = await Product.aggregate(pipeline)
+        if (range === 'month') {
+          chartData = agg.map((item) => ({
+            date: `Year ${item._id.year}, Week ${item._id.isoWeek}`,
+            count: item.count,
+          }))
+        } else {
+          chartData = agg.map((item) => ({
+            date: item._id,
+            count: item.count,
+          }))
+        }
+      }
+  
+      return {
+        tab,        
+        range,     
+        totalCount, 
+        chartData,
+      }
+    },
+    component: dashboardComponent,
+  },
+  
 });
+
+adminJsInstance.watch()
 
 if (process.env.NODE_ENV === "development") {
   adminJsInstance.watch();

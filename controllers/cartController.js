@@ -1,6 +1,5 @@
 import Cart from "../models/Cart.js";
 
-// Lấy giỏ hàng của người dùng
 const getCart = async (req, res) => {
   try {
     const cart = await Cart.findOne({ userId: req.params.userId }).populate("products.productId");
@@ -11,7 +10,6 @@ const getCart = async (req, res) => {
   }
 };
 
-// Thêm sản phẩm vào giỏ hàng
 const addToCart = async (req, res) => {
   const { userId } = req.params;
   const { productId, quantity } = req.body;
@@ -39,9 +37,8 @@ const addToCart = async (req, res) => {
   }
 };
 
-// Xóa sản phẩm khỏi giỏ hàng
 export const updateCartItem = async (req, res) => {
-  const { userId, itemId } = req.params;
+  const { userId, productId } = req.params;
   const { quantity } = req.body;
 
   if (quantity == null || typeof quantity !== "number") {
@@ -54,12 +51,8 @@ export const updateCartItem = async (req, res) => {
       return res.status(404).json({ message: "Cart not found" });
     }
 
-    console.log(11122233, cart);
-    console.log(11122233666, cart.products);
-    console.log(99111, req.params)
-    const itemId_await = req.params.productId
     const productIndex = cart.products.findIndex(
-      (item) => item.productId.toString() === itemId_await
+      (item) => item.productId.toString() === productId
     );
     
     if (productIndex === -1) {
@@ -79,4 +72,30 @@ export const updateCartItem = async (req, res) => {
   }
 };
 
-export default { getCart, addToCart, updateCartItem };
+export const removeFromCart = async (req, res) => {
+  const { userId, productId } = req.params;
+  
+  try {
+    const cart = await Cart.findOne({ userId });
+    if (!cart) {
+      return res.status(404).json({ message: "Cart not found" });
+    }
+
+    const productIndex = cart.products.findIndex(
+      (item) => item.productId.toString() === productId
+    );
+    
+    if (productIndex === -1) {
+      return res.status(404).json({ message: "Product not found in cart" });
+    }
+    
+    // Remove the product from the cart
+    cart.products.splice(productIndex, 1);
+    await cart.save();
+    res.status(200).json(cart);
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err });
+  }
+};
+
+export default { getCart, addToCart, updateCartItem, removeFromCart };

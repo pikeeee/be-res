@@ -36,8 +36,10 @@
     "mongoose": "^8.7.0",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.16",
+    "recharts": "^2.15.1",
     "socket.io": "^4.8.0",
-    "stripe": "^17.7.0"
+    "stripe": "^17.7.0",
+    "styled-components": "^6.1.15"
   },
   "devDependencies": {
     "@types/node": "^22.5.5",
